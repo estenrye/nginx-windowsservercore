@@ -1,0 +1,47 @@
+version: "3"
+services:
+  nginx:
+    image: estenrye/nginx:windowsservercore
+    environment:
+      - "NginxVersion=1.12.0"
+      - "WriteReverseProxyConfFromEnv=true"
+      - "ReverseProxyListenPort=80"
+      - "ReverseProxyServerName=nginx"
+      - "ReverseProxyLocationList=@('/==>http://home', '/hello==>http://hello', '/goodbye==>http://goodbye')"
+    ports: 
+      - 8095:80
+    networks:
+      public:
+    build:
+      context: .
+      dockerfile: Dockerfile
+  home:
+    image: estenrye/microsoft-iis-helloworld
+    environment:
+      - "pageText=Home"
+    networks:
+      public:
+        aliases:
+          - home
+  hello:
+    image: estenrye/microsoft-iis-helloworld
+    environment:
+      - "pageText=Hello"
+      - "useCustomPath=true"
+      - "customPath=hello"
+    networks:
+      public:
+        aliases: 
+          - hello
+  goodbye:
+    image: estenrye/microsoft-iis-helloworld
+    environment:
+      - "pageText=Goodbye"
+      - "useCustomPath=true"
+      - "customPath=goodbye"
+    networks:
+      public:
+        aliases:
+          - goodbye
+networks:
+  public:
