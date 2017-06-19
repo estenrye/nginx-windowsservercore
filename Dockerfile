@@ -1,6 +1,6 @@
 FROM microsoft/windowsservercore:latest
 MAINTAINER @csciborg
-ENV NginxVersion 1.13.1
+ENV NginxVersion 1.12.0
 ENV WriteReverseProxyConfFromEnv=true \
     ReverseProxyListenPort=80 \
     ReverseProxyServerName=nginx
