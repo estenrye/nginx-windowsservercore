@@ -71,6 +71,7 @@ $config = "  server {
     listen       $ListenPort;
     server_name  $ServerName;
     access_log   logs/reverseproxy.access.log  main;
+    resolver 127.0.0.11 ipv6=off;
 
 $locationConfig
   }
