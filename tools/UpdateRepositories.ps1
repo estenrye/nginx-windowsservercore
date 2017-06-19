@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$version,
     [ValidateSet("none", "stable", "mainline")]
-    [string]$alternateTag = "none"
+    [string]$alternateTag = "none",
     [switch]$isLatest = $false
 )
 
