@@ -3,9 +3,7 @@ services:
   nginx:
     image: estenrye/nginx:windowsservercore
     environment:
-      - "NginxVersion=1.12.0"
       - "WriteReverseProxyConfFromEnv=true"
-      - "ReverseProxyListenPort=80"
       - "ReverseProxyServerName=nginx"
       - "ReverseProxyLocationList=@('/==>http://home', '/hello==>http://hello', '/goodbye==>http://goodbye')"
     ports: 
