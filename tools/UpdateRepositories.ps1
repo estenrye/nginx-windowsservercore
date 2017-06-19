@@ -19,7 +19,7 @@ if ($alternateTag -ne "none")
 
 if ($isLatest)
 {
-    docker tag "estenrye/nginx-windowsservercore:latest" "estenrye/nginx-windowsservercore:latest"
+    docker tag "estenrye/nginx-windowsservercore:$version" "estenrye/nginx-windowsservercore:latest"
     $versionsToPush += "estenrye/nginx-windowsservercore:latest"    
 }
 
