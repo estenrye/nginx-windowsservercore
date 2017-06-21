@@ -18,12 +18,24 @@ function Generate-Locations
 
     foreach($location in $locations)
     {
+		$rewrite = $false
+		$offset = 3
         Write-Host "`t$location"
         $index = $location.IndexOf('==>')
+		if ($index -eq -1)
+		{
+			$rewrite = $true
+			$index = $location.IndexOf('==R=>')
+			$offset = 5
+		}
         $route = $location.Substring(0, $index)
-        $server =$location.Substring($index+3)
+        $server =$location.Substring($index+$offset)
 
         $result += "    location $route {`n"
+		if ($rewrite)
+        {
+			$result += "      rewrite $route(.*) /$1  break;`n"
+		}
         $result += "      proxy_pass      $server;`n"
         $result += "    }`n"
     }
