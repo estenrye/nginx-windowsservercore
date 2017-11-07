@@ -3,7 +3,8 @@ MAINTAINER @csciborg
 ENV NginxVersion 1.13.1
 ENV WriteReverseProxyConfFromEnv=true \
     ReverseProxyListenPort=80 \
-    ReverseProxyServerName=nginx
+    ReverseProxyServerName=nginx \
+	ReverseProxyLocationList=@() 
 EXPOSE ${ReverseProxyListenPort}
 
 SHELL ["powershell", "-command"]

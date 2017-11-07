@@ -89,7 +89,7 @@ $locationConfig
   }
 " 
 
-if ($WriteConf)
+if ($WriteConf -and ($LocationList.Length -gt 0))
 {
     ReplaceConfigTarget `
         -InputFile "$PSScriptRoot\nginx.conf" `
