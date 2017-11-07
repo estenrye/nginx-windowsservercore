@@ -10,6 +10,7 @@ Write-Host "Generate-ReverseProxyConf.ps1 Started"
 Write-Host "WriteConf: $WriteConf"
 Write-Host "ListenPort: $ListenPort"
 Write-Host "ServerName: $ServerName"
+Write-Host "EnabledSitesPath: $EnabledSitesPath"
 Write-Host "LocationList:"
 
 function Generate-Locations
