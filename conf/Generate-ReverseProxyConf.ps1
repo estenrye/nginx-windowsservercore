@@ -2,7 +2,8 @@ param(
     [switch]$WriteConf = [bool]::Parse($env:WriteReverseProxyConfFromEnv),
     [int]$ListenPort = [int]::Parse($env:ReverseProxyListenPort),
     [string]$ServerName = $env:ReverseProxyServerName,
-    [string[]]$LocationList = (iex "$env:ReverseProxyLocationList")
+    [string[]]$LocationList = (iex "$env:ReverseProxyLocationList"),
+	[string]$EnabledSitesPath = $env:EnabledSitesPath
 )
 
 Write-Host "Generate-ReverseProxyConf.ps1 Started"
@@ -78,25 +79,34 @@ function ReplaceConfigTarget
     $outStream.close()
 }
 
-$locationConfig = Generate-Locations -locations $LocationList
-$config = "  server { 
+if ($WriteConf -and ($LocationList.Length -gt 0))
+{
+    $locationConfig = Generate-Locations -locations $LocationList
+    $virtualServerConf = "  server { 
     listen       $ListenPort;
     server_name  $ServerName;
-    access_log   logs/reverseproxy.access.log  main;
+    access_log   logs/$ServerName.reverseproxy.access.log  main;
     resolver 127.0.0.11 ipv6=off;
 
 $locationConfig
   }
 " 
+    Set-Content -Path "$($env:EnabledSitesPath)\$ServerName.virtualserver.conf" -Value $virtualServerConf
+}
 
-if ($WriteConf -and ($LocationList.Length -gt 0))
-{
-    ReplaceConfigTarget `
+$nginxConfDir = "c:/nginx/nginx-$($env:NginxVersion)/conf"
+$proxyDefaultsFile="$nginxConfDir/proxy.conf"
+
+$config = "  include $proxyDefaultsFile;
+  include $(($EnabledSitesPath).Replace("\", "/"))/*.conf;
+
+"
+
+ReplaceConfigTarget `
         -InputFile "$PSScriptRoot\nginx.conf" `
         -OutputFile "$PSScriptRoot\nginx.conf.1" `
         -TargetLineToReplace '###_SERVER_REPLACEMENT_TARGET_###' `
         -Content $config
     
-    Remove-Item "$PSScriptRoot\nginx.conf"
-    mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"
-}
+Remove-Item "$PSScriptRoot\nginx.conf"
+mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"

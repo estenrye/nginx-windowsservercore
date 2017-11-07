@@ -4,13 +4,15 @@ ENV NginxVersion 1.13.1
 ENV WriteReverseProxyConfFromEnv=true \
     ReverseProxyListenPort=80 \
     ReverseProxyServerName=nginx \
-	ReverseProxyLocationList=@() 
+	ReverseProxyLocationList=@() \
+    EnabledSitesPath=c:\\nginx-enabled-sites
 EXPOSE ${ReverseProxyListenPort}
 
 SHELL ["powershell", "-command"]
 RUN Invoke-WebRequest "http://nginx.org/download/nginx-$($env:NginxVersion).zip" -OutFile C:\nginx.zip; \
     Expand-Archive C:\nginx.zip C:\nginx ; \
-    Remove-Item "C:\nginx\nginx-$($env:NginxVersion)\conf\*.conf" -Verbose;
+    Remove-Item "C:\nginx\nginx-$($env:NginxVersion)\conf\*.conf" -Verbose; \
+	New-Item -type directory "$($env:EnabledSitesPath)";
 
 WORKDIR /nginx/nginx-${NginxVersion}
 COPY ./conf/* ./conf/
