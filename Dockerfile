@@ -13,7 +13,8 @@ SHELL ["powershell", "-command"]
 RUN Invoke-WebRequest "http://nginx.org/download/nginx-$($env:NginxVersion).zip" -OutFile C:\nginx.zip; \
     Expand-Archive C:\nginx.zip C:\nginx ; \
     Remove-Item "C:\nginx\nginx-$($env:NginxVersion)\conf\*.conf" -Verbose; \
-	New-Item -type directory "$($env:EnabledSitesPath)";
+	New-Item -type directory "$($env:EnabledSitesPath)"; \
+	Remove-Item C:\nginx.zip;
 
 WORKDIR /nginx/nginx-${NginxVersion}
 COPY ./conf/* ./conf/
