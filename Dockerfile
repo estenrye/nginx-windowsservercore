@@ -5,7 +5,8 @@ ENV WriteReverseProxyConfFromEnv=true \
     ReverseProxyListenPort=80 \
     ReverseProxyServerName=nginx \
 	ReverseProxyLocationList=@() \
-    EnabledSitesPath=c:\\nginx-enabled-sites
+    EnabledSitesPath=c:\\nginx-enabled-sites \
+    EnableNginxWebServer=true
 EXPOSE ${ReverseProxyListenPort}
 
 SHELL ["powershell", "-command"]

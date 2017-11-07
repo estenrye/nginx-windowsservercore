@@ -3,7 +3,8 @@ param(
     [int]$ListenPort = [int]::Parse($env:ReverseProxyListenPort),
     [string]$ServerName = $env:ReverseProxyServerName,
     [string[]]$LocationList = (iex "$env:ReverseProxyLocationList"),
-	[string]$EnabledSitesPath = $env:EnabledSitesPath
+	[string]$EnabledSitesPath = $env:EnabledSitesPath,
+	[switch]$EnableNginxWebServer = [bool]::Parse($env:EnableNginxWebServer)
 )
 
 Write-Host "Generate-ReverseProxyConf.ps1 Started"
@@ -11,6 +12,7 @@ Write-Host "WriteConf: $WriteConf"
 Write-Host "ListenPort: $ListenPort"
 Write-Host "ServerName: $ServerName"
 Write-Host "EnabledSitesPath: $EnabledSitesPath"
+Write-Host "EnableNginxWebServer: $EnableNginxWebServer"
 Write-Host "LocationList:"
 
 function Generate-Locations
@@ -93,6 +95,24 @@ $locationConfig
   }
 " 
     Set-Content -Path "$($env:EnabledSitesPath)\$ServerName.virtualserver.conf" -Value $virtualServerConf
+}
+
+if ($EnableNginxWebServer)
+{
+    $defaultWebServerConf = "  server {
+	listen       $ListenPort;
+	location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    # redirect server error pages to the static page /50x.html
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+            root   html;
+        }
+  }
+"
+   Set-Content -Path "$($env:EnabledSitesPath)\defaultweb.virtualserver.conf" -Value $defaultWebServerConf
 }
 
 $nginxConfDir = "c:/nginx/nginx-$($env:NginxVersion)/conf"
