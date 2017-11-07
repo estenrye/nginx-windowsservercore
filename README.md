@@ -22,5 +22,16 @@ This repository holds my docker file and scripts to build a windows server core 
     * Example: `ReverseProxyServerName="nginx nginx.local"`
 * **ReverseProxyLocationList**
     * Acceptable Values: A powershell array of strings representing proxy locations of the format *location==>targetLocation*
-    * Default: No Default Value Defined.
+    * Default: `@()`
     * Example: `ReverseProxyLocationList="@('/==>http://home', '/hello==>http://hello', '/goodbye==>http://goodbye')"`
+* **EnabledSitesPath**
+    * This variable defines the location inside container where the server block configuraiton files will be stored and included from.
+    * To load externally generated server block configuration files into the container, mount a volume and set this variable to mount destination.
+    * Acceptable Values: A directory path existing inside container.
+	* Default: `c:\nginx\enabled-sites`
+	* Example: `docker run -d --mount type=volume,src=mynginxvol,dst=c:/mynginxconf -e EnabledSitesPath=c:\mynginxconf -P estenrye/nginx-windowsservercore`	
+* **EnableNginxWebServer**
+    * This variable allows to add a server block to serve content out of /html directory of nginx. This can be used to test basic nginx installation
+	* Acceptable Values: `true` or `false`
+    * Default: `true`
+    * Example: `EnableNginxWebServer=true`
