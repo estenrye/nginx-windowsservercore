@@ -82,8 +82,10 @@ function ReplaceConfigTarget
     $outStream.close()
 }
 
-if ($WriteConf -and ($LocationList.Length -gt 0))
+if($WriteConf)
 {
+  if ($LocationList.Length -gt 0)
+  {
     $locationConfig = Generate-Locations -locations $LocationList
     $virtualServerConf = "  server { 
     listen       $ListenPort;
@@ -95,10 +97,10 @@ $locationConfig
   }
 " 
     Set-Content -Path "$($env:EnabledSitesPath)\$ServerName.virtualserver.conf" -Value $virtualServerConf
-}
+  }
 
-if ($EnableNginxWebServer)
-{
+  if ($EnableNginxWebServer)
+  {
     $defaultWebServerConf = "  server {
 	listen       $ListenPort;
 	location / {
@@ -113,21 +115,22 @@ if ($EnableNginxWebServer)
   }
 "
    Set-Content -Path "$($env:EnabledSitesPath)\defaultweb.virtualserver.conf" -Value $defaultWebServerConf
-}
+  }
 
-$nginxConfDir = "c:/nginx/nginx-$($env:NginxVersion)/conf"
-$proxyDefaultsFile="$nginxConfDir/proxy.conf"
+  $nginxConfDir = "c:/nginx/nginx-$($env:NginxVersion)/conf"
+  $proxyDefaultsFile="$nginxConfDir/proxy.conf"
 
-$config = "  include $proxyDefaultsFile;
+  $config = "  include $proxyDefaultsFile;
   include $(($EnabledSitesPath).Replace("\", "/"))/*.conf;
 
 "
 
-ReplaceConfigTarget `
+  ReplaceConfigTarget `
         -InputFile "$PSScriptRoot\nginx.conf" `
         -OutputFile "$PSScriptRoot\nginx.conf.1" `
         -TargetLineToReplace '###_SERVER_REPLACEMENT_TARGET_###' `
         -Content $config
     
-Remove-Item "$PSScriptRoot\nginx.conf"
-mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"
+  Remove-Item "$PSScriptRoot\nginx.conf"
+  mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"
+}

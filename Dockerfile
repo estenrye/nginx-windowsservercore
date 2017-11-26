@@ -6,7 +6,8 @@ ENV WriteReverseProxyConfFromEnv=true \
     ReverseProxyServerName=nginx \
 	ReverseProxyLocationList=@() \
     EnabledSitesPath=c:\\nginx\\enabled-sites \
-    EnableNginxWebServer=true
+    EnableNginxWebServer=true \
+	NginxConfFile=c:\\nginx\\nginx-${NginxVersion}\\conf\\nginx.conf
 EXPOSE ${ReverseProxyListenPort}
 
 SHELL ["powershell", "-command"]
@@ -19,4 +20,4 @@ RUN Invoke-WebRequest "http://nginx.org/download/nginx-$($env:NginxVersion).zip"
 WORKDIR /nginx/nginx-${NginxVersion}
 COPY ./conf/* ./conf/
 
-ENTRYPOINT .\conf\Generate-ReverseProxyConf.ps1;.\nginx.exe
+ENTRYPOINT .\conf\Generate-ReverseProxyConf.ps1;.\nginx.exe -c $env:NginxConfFile
