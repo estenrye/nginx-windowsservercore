@@ -35,3 +35,7 @@ This repository holds my docker file and scripts to build a windows server core 
 	* Acceptable Values: `true` or `false`
     * Default: `true`
     * Example: `EnableNginxWebServer=true`
+* **NginxConfFile**
+    * This variable allows to supply a custom nginx.conf
+	* Default: `c:\nginx\nginx-${NginxVersion}\conf\nginx.conf`
+	* Example: `docker run -d --mount type=volume,src=mynginxvol,dst=c:/mynginxconf -e NginxConfFile=c:\mynginxconf\nginx.conf -P estenrye/nginx-windowsservercore`
