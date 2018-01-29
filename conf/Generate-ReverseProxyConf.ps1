@@ -2,13 +2,17 @@ param(
     [switch]$WriteConf = [bool]::Parse($env:WriteReverseProxyConfFromEnv),
     [int]$ListenPort = [int]::Parse($env:ReverseProxyListenPort),
     [string]$ServerName = $env:ReverseProxyServerName,
-    [string[]]$LocationList = (iex "$env:ReverseProxyLocationList")
+    [string[]]$LocationList = (iex "$env:ReverseProxyLocationList"),
+	[string]$EnabledSitesPath = $env:EnabledSitesPath,
+	[switch]$EnableNginxWebServer = [bool]::Parse($env:EnableNginxWebServer)
 )
 
 Write-Host "Generate-ReverseProxyConf.ps1 Started"
 Write-Host "WriteConf: $WriteConf"
 Write-Host "ListenPort: $ListenPort"
 Write-Host "ServerName: $ServerName"
+Write-Host "EnabledSitesPath: $EnabledSitesPath"
+Write-Host "EnableNginxWebServer: $EnableNginxWebServer"
 Write-Host "LocationList:"
 
 function Generate-Locations
@@ -78,25 +82,55 @@ function ReplaceConfigTarget
     $outStream.close()
 }
 
-$locationConfig = Generate-Locations -locations $LocationList
-$config = "  server { 
+if($WriteConf)
+{
+  if ($LocationList.Length -gt 0)
+  {
+    $locationConfig = Generate-Locations -locations $LocationList
+    $virtualServerConf = "  server { 
     listen       $ListenPort;
     server_name  $ServerName;
-    access_log   logs/reverseproxy.access.log  main;
+    access_log   logs/$ServerName.reverseproxy.access.log  main;
     resolver 127.0.0.11 ipv6=off;
 
 $locationConfig
   }
 " 
+    Set-Content -Path "$($env:EnabledSitesPath)\$ServerName.virtualserver.conf" -Value $virtualServerConf
+  }
 
-if ($WriteConf)
-{
-    ReplaceConfigTarget `
+  if ($EnableNginxWebServer)
+  {
+    $defaultWebServerConf = "  server {
+	listen       $ListenPort;
+	location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    # redirect server error pages to the static page /50x.html
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+            root   html;
+        }
+  }
+"
+   Set-Content -Path "$($env:EnabledSitesPath)\defaultweb.virtualserver.conf" -Value $defaultWebServerConf
+  }
+
+  $nginxConfDir = "c:/nginx/nginx-$($env:NginxVersion)/conf"
+  $proxyDefaultsFile="$nginxConfDir/proxy.conf"
+
+  $config = "  include $proxyDefaultsFile;
+  include $(($EnabledSitesPath).Replace("\", "/"))/*.conf;
+
+"
+
+  ReplaceConfigTarget `
         -InputFile "$PSScriptRoot\nginx.conf" `
         -OutputFile "$PSScriptRoot\nginx.conf.1" `
         -TargetLineToReplace '###_SERVER_REPLACEMENT_TARGET_###' `
         -Content $config
     
-    Remove-Item "$PSScriptRoot\nginx.conf"
-    mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"
+  Remove-Item "$PSScriptRoot\nginx.conf"
+  mv "$PSScriptRoot\nginx.conf.1" "$PSScriptRoot\nginx.conf"
 }
